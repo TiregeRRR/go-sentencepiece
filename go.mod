@@ -1,9 +1,9 @@
-module github.com/vikesh-raj/go-sentencepiece-encoder
+module github.com/TiregeRRR/go-sentencepiece
 
-go 1.15
+go 1.21.1
 
 require (
-	github.com/golang/protobuf v1.4.1
-	golang.org/x/text v0.3.0
-	google.golang.org/protobuf v1.25.0
+	github.com/golang/protobuf v1.5.3
+	golang.org/x/text v0.13.0
+	google.golang.org/protobuf v1.31.0
 )

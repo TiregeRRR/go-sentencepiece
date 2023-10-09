@@ -8,9 +8,11 @@ import (
 	"unicode/utf8"
 )
 
-const minScore float32 = -math.MaxFloat32
-const sep rune = 0x2581
-const unknown string = "<unk>"
+const (
+	minScore float32 = -math.MaxFloat32
+	sep      rune    = 0x2581
+	unknown  string  = "<unk>"
+)
 
 type slice struct {
 	score float32
@@ -180,9 +182,21 @@ func (s *Sentencepiece) decodeForwardToken(runes []rune) []slice {
 	scores := initScores(len(runes) + 1)
 	slices := s.initSlices(len(runes) + 1)
 	scores[0] = 0.0
+	output := make([]trieNode, 0, len(runes))
 	for i := range runes {
-		matches := s.commonPrefixSearch(runes[i:])
-		for _, node := range matches {
+		node := &s.root
+		for j := i; j < len(runes)-1; j++ {
+			cnode, ok := node.children[runes[j]]
+			if !ok {
+				break
+			}
+			if cnode.end {
+				output = append(output, cnode)
+			}
+			node = &cnode
+		}
+
+		for _, node := range output {
 			localScore := scores[i] + node.score
 			charEnd := i + node.level
 			if localScore > scores[charEnd] {
@@ -194,6 +208,8 @@ func (s *Sentencepiece) decodeForwardToken(runes []rune) []slice {
 			slices[i+1] = slice{score: minScore, index: s.unknown, start: i, end: i + 1}
 			scores[i+1] = 0.0
 		}
+
+		output = output[:0]
 	}
 	return slices
 }
