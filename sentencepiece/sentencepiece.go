@@ -178,13 +178,14 @@ func (s *Sentencepiece) decodeBackwards(slices []slice) []slice {
 	return best[i : len+1]
 }
 
+var output = make([]trieNode, 0, 1000)
+
 func (s *Sentencepiece) decodeForwardToken(runes []rune) []slice {
 	scores := initScores(len(runes) + 1)
 	slices := s.initSlices(len(runes) + 1)
 	scores[0] = 0.0
-	output := make([]trieNode, 0, len(runes))
 	for i := range runes {
-		node := &s.root
+		node := s.root
 		for j := i; j < len(runes)-1; j++ {
 			cnode, ok := node.children[runes[j]]
 			if !ok {
@@ -193,7 +194,7 @@ func (s *Sentencepiece) decodeForwardToken(runes []rune) []slice {
 			if cnode.end {
 				output = append(output, cnode)
 			}
-			node = &cnode
+			node = cnode
 		}
 
 		for _, node := range output {
